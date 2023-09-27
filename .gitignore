@@ -1,0 +1,14 @@
+# Ignore migrations:
+*/migrations/*
+!*/migrations/__init__.py
+
+# Ignore all log files:
+*.log
+
+# Byte-compiled / optimized / DLL files:
+__pycache__/
+*.py[cod]
+*$py.class
+
+# SQLite database:
+*.sqlite3
