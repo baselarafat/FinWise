@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -7,62 +9,114 @@
     <title>Financial Dashboard</title>
     <!-- Bootstrap CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Custom Styles -->
+    <link href="{% static 'core/static/styles.css' %}" rel="stylesheet">
+    
 </head>
 
 <body>
 
 <div class="container mt-5">
-    <h2>Welcome to your financial dashboard, {{ request.user.username }}</h2>
+    <h2 class="header">Welcome to your financial dashboard, {{ request.user.username }}</h2>
+    <div class="mt-5">
+        <canvas id="expenseIncomeChart" width="400" height="200"></canvas>
+    </div>
 
     <div class="row mt-5">
         <!-- Expenses -->
         <div class="col-md-4">
-            <h4>Recent Expenses</h4>
-            <ul class="list-group">
-                {% for expense in expenses %}
-                <li class="list-group-item">
-                    {{ expense.description }}: ${{ expense.amount }} ({{ expense.date }})
-                </li>
-                {% empty %}
-                <li class="list-group-item">No recent expenses.</li>
-                {% endfor %}
-            </ul>
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Recent Expenses</h4>
+                    <ul class="list-group list-group-flush">
+                        {% for expense in expenses %}
+                        <li class="list-group-item">
+                            {{ expense.description }}: ${{ expense.amount }} ({{ expense.date }})
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item">No recent expenses.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <a href="{% url 'add_expense' %}" class="btn btn-primary mt-2">Add Expense</a>
         </div>
 
         <!-- Incomes -->
         <div class="col-md-4">
-            <h4>Recent Incomes</h4>
-            <ul class="list-group">
-                {% for income in incomes %}
-                <li class="list-group-item">
-                    {{ income.description }}: ${{ income.amount }} ({{ income.date }})
-                </li>
-                {% empty %}
-                <li class="list-group-item">No recent incomes.</li>
-                {% endfor %}
-            </ul>
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Recent Incomes</h4>
+                    <ul class="list-group list-group-flush">
+                        {% for income in incomes %}
+                        <li class="list-group-item">
+                            {{ income.description }}: ${{ income.amount }} ({{ income.date }})
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item">No recent incomes.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <a href="{% url 'add_income' %}" class="btn btn-primary mt-2">Add Income</a>
         </div>
 
         <!-- Financial Goals -->
         <div class="col-md-4">
-            <h4>Your Financial Goals</h4>
-            <ul class="list-group">
-                {% for goal in goals %}
-                <li class="list-group-item">
-                    {{ goal.description }}: ${{ goal.target_amount }} by {{ goal.target_date }}
-                </li>
-                {% empty %}
-                <li class="list-group-item">No financial goals set.</li>
-                {% endfor %}
-            </ul>
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Your Financial Goals</h4>
+                    <ul class="list-group list-group-flush">
+                        {% for goal in goals %}
+                        <li class="list-group-item">
+                            {{ goal.description }}: ${{ goal.target_amount }} by {{ goal.target_date }}
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item">No financial goals set.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <a href="{% url 'add_goal' %}" class="btn btn-primary mt-2">Add Goal</a>
         </div>
     </div>
 </div>
+<!-- Chart.js Initialization -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let ctx = document.getElementById('expenseIncomeChart').getContext('2d');
+    let expenseIncomeChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Expenses', 'Income'], // X-axis labels
+            datasets: [{
+                label: 'Amounts',
+                data: [{{ expenses_sum }}, {{ incomes_sum }}],
+            backgroundColor: ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)'], 
+            borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)'],
+            borderWidth: 1
+    }]
+} ,
 
-<!-- Bootstrap JS and jQuery (optional but often used with Bootstrap) -->
+        options : {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+});
+</script>
+<!-- Bootstrap JS and jQuery -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 
 </body>
 </html>
