@@ -20,8 +20,19 @@
 
 <div class="container mt-5">
     <h2 class="header">Welcome to your financial dashboard, {{ request.user.username }}</h2>
+
+    <!-- Financial Overview -->
+    <h4 class="mt-4 mb-3">Financial Overview</h4>
+    <p class="mb-4">Predicted Next Month's Expense: ${{ predicted_expense }}</p>
+
     <div class="mt-5">
         <canvas id="expenseIncomeChart" width="400" height="200"></canvas>
+    </div>
+
+    <!-- Category-wise breakdown -->
+    <h4 class="mt-4 mb-3">Expense Breakdown by Category</h4>
+    <div class="mt-4">
+        <canvas id="categoryExpenseChart" width="300" height="150"></canvas>
     </div>
 
     <div class="row mt-5">
@@ -86,8 +97,8 @@
 <!-- Chart.js Initialization -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    let ctx = document.getElementById('expenseIncomeChart').getContext('2d');
-    let expenseIncomeChart = new Chart(ctx, {
+    let ctx1 = document.getElementById('expenseIncomeChart').getContext('2d');
+    let expenseIncomeChart = new Chart(ctx1, {
         type: 'bar',
         data: {
             labels: ['Expenses', 'Income'], // X-axis labels
@@ -106,7 +117,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 y: {
                     beginAtZero: true
                 }
-            }
+            },
+        }
+    });
+    // Category-wise expense breakdown
+    let ctx2 = document.getElementById('categoryExpenseChart').getContext('2d');
+    let categoryExpenseChart = new Chart(ctx2, {
+        type: 'pie',
+        data: {
+            labels: [{% for cat_exp in category_expenses %}'{{ cat_exp.category }}',{% endfor %}],
+            datasets: [{
+                data: [{% for cat_exp in category_expenses %}{{ cat_exp.total }},{% endfor %}],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
         }
     });
 });

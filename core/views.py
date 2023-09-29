@@ -5,26 +5,55 @@ from .models import Expense, Income, FinancialGoal
 from .forms import ExpenseForm, IncomeForm, FinancialGoalForm
 
 from django.db.models import Sum
+from django.db import models
+
+
+from sklearn.linear_model import LinearRegression
+import numpy as np
 
 
 @login_required
 def dashboard(request):
-    expenses = Expense.objects.filter(user=request.user).order_by(
-        '-date')[:5]  # Get last 5 expenses
-    incomes = Income.objects.filter(user=request.user).order_by(
-        '-date')[:5]  # Get last 5 incomes
-    goals = FinancialGoal.objects.filter(user=request.user)
-    expenses_sum = Expense.objects.filter(
-        user=request.user).aggregate(Sum('amount'))['amount__sum'] or 0
-    incomes_sum = Income.objects.filter(user=request.user).aggregate(
-        Sum('amount'))['amount__sum'] or 0
+    user = request.user
 
+    # Fetch latest 5 expenses and incomes.
+    expenses = Expense.objects.filter(user=user).order_by('-date')[:5]
+    incomes = Income.objects.filter(user=user).order_by('-date')[:5]
+
+    # Calculate total expenses and incomes.
+    expenses_sum = Expense.objects.filter(user=user).aggregate(Sum('amount'))[
+        'amount__sum'] or 0
+    incomes_sum = Income.objects.filter(user=user).aggregate(Sum('amount'))[
+        'amount__sum'] or 0
+
+    # Fetch latest 6 months' expenses.
+    past_expenses = list(Expense.objects.filter(
+        user=user).order_by('-date')[:6])
+
+    # Predict next month's expense using linear regression.
+    if len(past_expenses) >= 2:
+        X = np.array(range(len(past_expenses))).reshape(-1, 1)
+        y = np.array([exp.amount for exp in past_expenses]).reshape(-1, 1)
+
+        model = LinearRegression().fit(X, y)
+        next_month_index = len(past_expenses)
+        predicted_expense = model.predict(np.array([[next_month_index]]))
+    else:
+        predicted_expense = [[0]]
+
+    # Aggregate expenses by category.
+    category_expenses = Expense.objects.filter(user=user).values(
+        'category').annotate(total=Sum('amount'))
+
+    # Build context for the template.
     context = {
         'expenses': expenses,
         'incomes': incomes,
-        'goals': goals,
+        'goals': FinancialGoal.objects.filter(user=user),
         'expenses_sum': expenses_sum,
         'incomes_sum': incomes_sum,
+        'predicted_expense': predicted_expense[0][0],
+        'category_expenses': category_expenses
     }
 
     return render(request, 'dashboard.html', context)

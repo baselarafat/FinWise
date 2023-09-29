@@ -1,2 +1,4 @@
 Django
 psycopg2  # This is the PostgreSQL adapter for Python, needed for Django to interact with PostgreSQL.
+numpy
+scikit-learn
