@@ -12,6 +12,8 @@ import pandas as pd
 from prophet import Prophet
 from prophet.plot import plot_plotly, plot_components_plotly
 
+from .utils import categorize_uncategorized_expenses
+
 
 @login_required
 def dashboard(request):
@@ -52,7 +54,7 @@ def dashboard(request):
         'category').annotate(total=Sum('amount'))
 
     # Plot the forecast
-    fig1 = model.plot(forecast)
+    #fig1 = model.plot(forecast)
 
     # Build context for the template.
     context = {
@@ -67,7 +69,6 @@ def dashboard(request):
 
     return render(request, 'dashboard.html', context)
 
-
 @login_required
 def add_expense(request):
     if request.method == 'POST':
@@ -80,7 +81,7 @@ def add_expense(request):
 
     else:
         form = ExpenseForm()
-
+    categorize_uncategorized_expenses()
     return render(request, 'add_expense.html', {'form': form})
 
 
