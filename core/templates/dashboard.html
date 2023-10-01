@@ -13,148 +13,156 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <!-- Custom Styles -->
     <link href="{% static 'core/static/styles.css' %}" rel="stylesheet">
-    
 </head>
 
 <body>
 
-<div class="container mt-5">
-    <h2 class="header">Welcome to your financial dashboard, {{ request.user.username }}</h2>
+    <div class="container mt-5">
+        <h2 class="header">Welcome to your financial dashboard, {{ request.user.username }}</h2>
 
-    <!-- Financial Overview -->
-    <h4 class="mt-4 mb-3">Financial Overview</h4>
-    <p class="mb-4">Predicted Next Month's Expense: ${{ predicted_expense }}</p>
+        <!-- Financial Overview -->
+        <h4 class="mt-4 mb-3">Financial Overview</h4>
+        <p class="mb-4">Predicted Next Month's Expense: ${{ predicted_expense }}</p>
 
-    <div class="mt-5">
-        <canvas id="expenseIncomeChart" width="400" height="200"></canvas>
+        <div class="row">
+            <!-- Expense and Income Chart -->
+            <div class="col-md-6">
+                <div class="chart">
+                    <canvas id="expenseIncomeChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Category-wise Breakdown Chart -->
+            <div class="col-md-6">
+                <div class="chart">
+                    <canvas id="categoryExpenseChart"></canvas>
+                </div>
+            </div>
+        </div>
+<br><br><br>
+<!-- Expenses, Incomes, and Goals -->
+<div class="row">
+    <!-- Expenses -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Recent Expenses</h4>
+                <ul class="list-group list-group-flush">
+                    {% for expense in expenses %}
+                    <li class="list-group-item">
+                        {{ expense.description }}: ${{ expense.amount }} ({{ expense.date }})
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item">No recent expenses.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <a href="{% url 'add_expense' %}" class="btn btn-primary mt-2">Add Expense</a>
     </div>
 
-    <!-- Category-wise breakdown -->
-    <h4 class="mt-4 mb-3">Expense Breakdown by Category</h4>
-    <div class="mt-4">
-        <canvas id="categoryExpenseChart" width="300" height="150"></canvas>
+    <!-- Incomes -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Recent Incomes</h4>
+                <ul class="list-group list-group-flush">
+                    {% for income in incomes %}
+                    <li class="list-group-item">
+                        {{ income.description }}: ${{ income.amount }} ({{ income.date }})
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item">No recent incomes.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <a href="{% url 'add_income' %}" class="btn btn-primary mt-2">Add Income</a>
     </div>
 
-    <div class="row mt-5">
-        <!-- Expenses -->
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h4 class="card-title">Recent Expenses</h4>
-                    <ul class="list-group list-group-flush">
-                        {% for expense in expenses %}
-                        <li class="list-group-item">
-                            {{ expense.description }}: ${{ expense.amount }} ({{ expense.date }})
-                        </li>
-                        {% empty %}
-                        <li class="list-group-item">No recent expenses.</li>
-                        {% endfor %}
-                    </ul>
-                </div>
+    <!-- Financial Goals -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Your Financial Goals</h4>
+                <ul class="list-group list-group-flush">
+                    {% for goal in goals %}
+                    <li class="list-group-item">
+                        {{ goal.description }}: ${{ goal.target_amount }} by {{ goal.target_date }}
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item">No financial goals set.</li>
+                    {% endfor %}
+                </ul>
             </div>
-            <a href="{% url 'add_expense' %}" class="btn btn-primary mt-2">Add Expense</a>
         </div>
-
-        <!-- Incomes -->
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h4 class="card-title">Recent Incomes</h4>
-                    <ul class="list-group list-group-flush">
-                        {% for income in incomes %}
-                        <li class="list-group-item">
-                            {{ income.description }}: ${{ income.amount }} ({{ income.date }})
-                        </li>
-                        {% empty %}
-                        <li class="list-group-item">No recent incomes.</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-            <a href="{% url 'add_income' %}" class="btn btn-primary mt-2">Add Income</a>
-        </div>
-
-        <!-- Financial Goals -->
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h4 class="card-title">Your Financial Goals</h4>
-                    <ul class="list-group list-group-flush">
-                        {% for goal in goals %}
-                        <li class="list-group-item">
-                            {{ goal.description }}: ${{ goal.target_amount }} by {{ goal.target_date }}
-                        </li>
-                        {% empty %}
-                        <li class="list-group-item">No financial goals set.</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-            <a href="{% url 'add_goal' %}" class="btn btn-primary mt-2">Add Goal</a>
-        </div>
+        <a href="{% url 'add_goal' %}" class="btn btn-primary mt-2">Add Goal</a>
     </div>
 </div>
-<!-- Chart.js Initialization -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    let ctx1 = document.getElementById('expenseIncomeChart').getContext('2d');
-    let expenseIncomeChart = new Chart(ctx1, {
-        type: 'bar',
-        data: {
-            labels: ['Expenses', 'Income'], // X-axis labels
-            datasets: [{
-                label: 'Amounts',
-                data: [{{ expenses_sum }}, {{ incomes_sum }}],
-            backgroundColor: ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)'], 
-            borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)'],
-            borderWidth: 1
-    }]
-} ,
 
-        options : {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
+
+    <!-- Chart.js Initialization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+        // Chart 1: Expense and Income Chart
+        let ctx1 = document.getElementById('expenseIncomeChart').getContext('2d');
+        let expenseIncomeChart = new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: ['Expenses', 'Income'],
+                datasets: [{
+                    label: 'Amounts',
+                    data: [{{ expenses_sum }}, {{ incomes_sum }}],
+                    backgroundColor: ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)'],
+                    borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)'],
+                    borderWidth: 1
+                }]
             },
-        }
-    });
-    // Category-wise expense breakdown
-    let ctx2 = document.getElementById('categoryExpenseChart').getContext('2d');
-    let categoryExpenseChart = new Chart(ctx2, {
-        type: 'pie',
-        data: {
-            labels: [{% for cat_exp in category_expenses %}'{{ cat_exp.category }}',{% endfor %}],
-            datasets: [{
-                data: [{% for cat_exp in category_expenses %}{{ cat_exp.total }},{% endfor %}],
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.6)',
-                    'rgba(54, 162, 235, 0.6)',
-                    'rgba(255, 206, 86, 0.6)',
-                    'rgba(75, 192, 192, 0.6)',
-                    'rgba(153, 102, 255, 0.6)',
-                    'rgba(255, 159, 64, 0.6)'
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+            }
+        });
+        // Chart 2: Category-wise expense breakdown
+        let ctx2 = document.getElementById('categoryExpenseChart').getContext('2d');
+        let categoryExpenseChart = new Chart(ctx2, {
+            type: 'pie',
+            data: {
+                labels: [{% for cat_exp in category_expenses %}'{{ cat_exp.category }}',{% endfor %}],
+                datasets: [{
+                    data: [{% for cat_exp in category_expenses %}{{ cat_exp.total }},{% endfor %}],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.6)',
+                        'rgba(54, 162, 235, 0.6)',
+                        'rgba(255, 206, 86, 0.6)',
+                        'rgba(75, 192, 192, 0.6)',
+                        'rgba(153, 102, 255, 0.6)',
+                        'rgba(255, 159, 64, 0.6)'
+                    ]
+                }]
             },
-        }
-    });
-});
-</script>
-<!-- Bootstrap JS and jQuery -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+            }
+        });
 
+        });
+    </script>
 
+    <!-- Bootstrap JS and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
+
 </html>

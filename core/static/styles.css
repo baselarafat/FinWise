@@ -8,15 +8,12 @@ body {
     padding-bottom: 10px;
 }
 
-.card {
+.chart {
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
     transition: 0.3s;
+    margin-bottom: 20px;
 }
 
-.card:hover {
+.chart:hover {
     box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
-}
-#categoryExpenseChart {
-    max-width: 80%; /* or whatever percentage or pixel value you prefer */
-    margin: 0 auto; /* centers the canvas if it's smaller than its container */
 }
