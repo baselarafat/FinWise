@@ -5,11 +5,12 @@ from .models import Expense, Income, FinancialGoal
 from .forms import ExpenseForm, IncomeForm, FinancialGoalForm
 
 from django.db.models import Sum
-from django.db import models
-
 
 from sklearn.linear_model import LinearRegression
-import numpy as np
+
+import pandas as pd
+from prophet import Prophet
+from prophet.plot import plot_plotly, plot_components_plotly
 
 
 @login_required
@@ -26,24 +27,32 @@ def dashboard(request):
     incomes_sum = Income.objects.filter(user=user).aggregate(Sum('amount'))[
         'amount__sum'] or 0
 
-    # Fetch latest 6 months' expenses.
-    past_expenses = list(Expense.objects.filter(
-        user=user).order_by('-date')[:6])
+    # Fetch all expenses for the user.
+    allexpenses = Expense.objects.filter(user=user).order_by('date')
 
-    # Predict next month's expense using linear regression.
-    if len(past_expenses) >= 2:
-        X = np.array(range(len(past_expenses))).reshape(-1, 1)
-        y = np.array([exp.amount for exp in past_expenses]).reshape(-1, 1)
+    # Convert the expenses to a DataFrame.
+    df = pd.DataFrame(list(allexpenses.values('date', 'amount')))
+    df.rename(columns={'date': 'ds', 'amount': 'y'}, inplace=True)
 
-        model = LinearRegression().fit(X, y)
-        next_month_index = len(past_expenses)
-        predicted_expense = model.predict(np.array([[next_month_index]]))
-    else:
-        predicted_expense = [[0]]
+    # Initialize and fit the Prophet model.
+    model = Prophet()
+    model.fit(df)
+
+    # Create a DataFrame for future dates (e.g., next month).
+    future = model.make_future_dataframe(periods=30)
+
+    # Predict expenses for the future dates.
+    forecast = model.predict(future)
+
+    # Extract the predicted value for the next month.
+    predicted_expense = forecast['yhat'].iloc[-1]
 
     # Aggregate expenses by category.
     category_expenses = Expense.objects.filter(user=user).values(
         'category').annotate(total=Sum('amount'))
+
+    # Plot the forecast
+    fig1 = model.plot(forecast)
 
     # Build context for the template.
     context = {
@@ -52,8 +61,8 @@ def dashboard(request):
         'goals': FinancialGoal.objects.filter(user=user),
         'expenses_sum': expenses_sum,
         'incomes_sum': incomes_sum,
-        'predicted_expense': predicted_expense[0][0],
-        'category_expenses': category_expenses
+        'category_expenses': category_expenses,
+        'predicted_expense': predicted_expense,
     }
 
     return render(request, 'dashboard.html', context)
