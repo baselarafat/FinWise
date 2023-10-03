@@ -3,3 +3,4 @@ psycopg2  # This is the PostgreSQL adapter for Python, needed for Django to inte
 numpy
 scikit-learn
 prophet # For Expense Prediction
+django-widget-tweaks
