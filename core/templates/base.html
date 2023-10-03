@@ -1,26 +1,56 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FinWise</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="{% static 'core/styles.css' %}">
 </head>
+
 <body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">FinWise</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'dashboard' %}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'add_income' %}">Income</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'add_expense' %}">Expenses</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'add_goal' %}">Goals</a>
+                </li>
+                <!-- Add other navigation links as necessary -->
+            </ul>
+        </div>
+    </nav>
 
-<nav>
-    <ul>
-        <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
-        <li><a href="{% url 'add_expense' %}">Add Expense</a></li>
-        <li><a href="{% url 'add_income' %}">Add Income</a></li>
-        <li><a href="{% url 'add_goal' %}">Add Goal</a></li>
-    </ul>
-</nav>
+    <!-- Main Content -->
+    <div class="container mt-5">
+        {% block content %}
+        {% endblock %}
+    </div>
 
-<main>
-    {% block content %}{% endblock %}
-</main>
-
-<!-- Add JS scripts here if needed -->
-
+    <!-- Bootstrap JS, Popper.js, and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
+
 </html>

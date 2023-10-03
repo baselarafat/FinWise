@@ -17,3 +17,8 @@ body {
 .chart:hover {
     box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
 }
+
+/* Added for better spacing around the card */
+.container {
+    padding-top: 50px;
+}
