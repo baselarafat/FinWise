@@ -12,7 +12,7 @@ import pandas as pd
 from prophet import Prophet
 from prophet.plot import plot_plotly, plot_components_plotly
 
-from .utils import categorize_uncategorized_expenses
+from .utils import categorize_uncategorized_expenses, generate_default_forecast
 
 from django.contrib import messages
 
@@ -45,18 +45,20 @@ def dashboard(request):
     allexpenses = Expense.objects.filter(user=user).order_by('date')
 
     # Convert the expenses to a DataFrame.
-    df = pd.DataFrame(list(allexpenses.values('date', 'amount')))
-    df.rename(columns={'date': 'ds', 'amount': 'y'}, inplace=True)
+    # Create a dataframe with dates for the next 30 days
+    user_data = pd.DataFrame(list(allexpenses.values('date', 'amount')))
+    user_data.rename(columns={'date': 'ds', 'amount': 'y'}, inplace=True)
 
-    # Initialize and fit the Prophet model.
-    model = Prophet()
-    model.fit(df)
+    try:
+        model = Prophet()
+        model.fit(user_data)  # user_data is the actual data for the user
+        future = model.make_future_dataframe(periods=7)
+        forecast = model.predict(future)
+    except (ValueError, Exception):
+        # Catch any error related to data issues or Prophet
+        forecast = generate_default_forecast()
+    # Optionally, inform the user that a default forecast is being shown
 
-    # Create a DataFrame for future dates (e.g., next month).
-    future = model.make_future_dataframe(periods=30)
-
-    # Predict expenses for the future dates.
-    forecast = model.predict(future)
 
     # Extract the predicted value for the next month.
     predicted_expense = forecast['yhat'].iloc[-1]
