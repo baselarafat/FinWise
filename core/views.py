@@ -16,6 +16,16 @@ from .utils import categorize_uncategorized_expenses
 
 from django.contrib import messages
 
+from django.shortcuts import redirect
+
+def home(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard.html')
+    return render(request, 'home.html')
+def login_view(request):
+    return render(request, 'registration/login.html')
+def signup_view(request):
+    return render(request, 'registration/signup.html')
 
 @login_required
 def dashboard(request):
@@ -124,5 +134,7 @@ def add_goal(request):
         form = FinancialGoalForm()
 
     return render(request, 'add_goal.html', {'form': form})
+
+
 
 

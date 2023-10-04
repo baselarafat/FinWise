@@ -37,6 +37,18 @@
                     <a class="nav-link" href="{% url 'add_goal' %}">Goals</a>
                 </li>
                 <!-- Add other navigation links as necessary -->
+                {% if user.is_authenticated %}
+                <li class="nav-item">
+                        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'login' %}">Login</a>
+                </li>
+                <li class="nav-item">
+                <a class="nav-link" href="{% url 'signup' %}">Sign Up</a>
+                </li>
+                {% endif %}
             </ul>
         </div>
     </nav>

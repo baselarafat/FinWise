@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Welcome to FinWise!</h1>
+    <p>Your one-stop solution for financial tracking and forecasting.</p>
+    
+    <div class="mt-4">
+        <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
+        <a href="{% url 'signup' %}" class="btn btn-secondary">Sign Up</a>
+    </div>
+</div>
+{% endblock %}

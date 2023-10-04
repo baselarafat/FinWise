@@ -13,11 +13,9 @@ class IncomeForm(forms.ModelForm):
     class Meta:
         model = Income
         fields = ['description', 'amount']
-        # User field is excluded
 
 
 class FinancialGoalForm(forms.ModelForm):
     class Meta:
         model = FinancialGoal
         fields = ['description', 'target_amount', 'target_date']
-        # User field is excluded
