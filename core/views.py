@@ -14,6 +14,8 @@ from prophet.plot import plot_plotly, plot_components_plotly
 
 from .utils import categorize_uncategorized_expenses
 
+from django.contrib import messages
+
 
 @login_required
 def dashboard(request):
@@ -77,10 +79,13 @@ def add_expense(request):
             expense = form.save(commit=False)
             expense.user = request.user
             expense.save()
+            messages.success(request, "Expense added successfully!")
             return redirect('dashboard')
-
+        else:
+            messages.error(request, "There was an error adding the expense.")
     else:
         form = ExpenseForm()
+
     categorize_uncategorized_expenses()
     return render(request, 'add_expense.html', {'form': form})
 
@@ -93,7 +98,10 @@ def add_income(request):
             income = form.save(commit=False)
             income.user = request.user
             income.save()
+            messages.success(request, "Income added successfully!")
             return redirect('dashboard')
+        else: 
+            messages.error(request, "There was an error adding the income.")
     else:
         form = IncomeForm()
 
@@ -108,10 +116,13 @@ def add_goal(request):
             goal = form.save(commit=False)
             goal.user = request.user
             goal.save()
+            messages.success(request, "Goal added successfully!")
             return redirect('dashboard')
+        else: 
+            messages.error(request, "There was an error adding the goal.")
     else:
         form = FinancialGoalForm()
 
     return render(request, 'add_goal.html', {'form': form})
 
-# Continue adding more views as needed.
+
