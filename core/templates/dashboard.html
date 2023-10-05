@@ -39,6 +39,8 @@
                         {% for expense in expenses %}
                         <li class="list-group-item">
                             {{ expense.description }}: ${{ expense.amount }} ({{ expense.date }})
+                            <a href="{% url 'update_expense' expense.id %}" class="btn btn-link btn-sm text-primary p-0 ml-2">Edit</a>
+                            <a href="{% url 'delete_expense' expense.id %}" class="btn btn-link btn-sm text-danger p-0 ml-2">Delete</a>
                         </li>
                         {% empty %}
                         <li class="list-group-item">No recent expenses.</li>

@@ -16,7 +16,7 @@ from .utils import categorize_uncategorized_expenses, generate_default_forecast
 
 from django.contrib import messages
 
-from django.shortcuts import redirect
+from django.shortcuts import redirect , get_object_or_404
 
 def home(request):
     if request.user.is_authenticated:
@@ -137,6 +137,77 @@ def add_goal(request):
 
     return render(request, 'add_goal.html', {'form': form})
 
+@login_required
+def update_expense(request, expense_id):
+    expense = get_object_or_404(Expense, id=expense_id, user=request.user)
+    if request.method == 'POST':
+        form = ExpenseForm(request.POST, instance=expense)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Expense updated successfully!")
+            return redirect('dashboard')
+        else:
+            messages.error(request, "There was an error updating the expense.")
+    else:
+        form = ExpenseForm(instance=expense)
+    return render(request, 'update_expense.html', {'form': form})
+
+@login_required
+def delete_expense(request, expense_id):
+    expense = get_object_or_404(Expense, id=expense_id, user=request.user)
+    if request.method == 'POST':
+        expense.delete()
+        messages.success(request, "Expense deleted successfully!")
+        return redirect('dashboard')
+    return render(request, 'delete_expense.html', {'expense': expense})
+
+@login_required
+def update_income(request, income_id):
+    income = get_object_or_404(Income, id=income_id, user=request.user)
+    if request.method == 'POST':
+        form = IncomeForm(request.POST, instance=income)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Income updated successfully!")
+            return redirect('dashboard')
+        else:
+            messages.error(request, "There was an error updating the income.")
+    else:
+        form = IncomeForm(instance=income)
+    return render(request, 'update_income.html', {'form': form})
+
+@login_required
+def delete_income(request, income_id):
+    income = get_object_or_404(Income, id=income_id, user=request.user)
+    if request.method == 'POST':
+        income.delete()
+        messages.success(request, "Income deleted successfully!")
+        return redirect('dashboard')
+    return render(request, 'delete_income.html', {'income': income})
+
+@login_required
+def update_goal(request, goal_id):
+    goal = get_object_or_404(FinancialGoal, id=goal_id, user=request.user)
+    if request.method == 'POST':
+        form = FinancialGoalForm(request.POST, instance=goal)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Goal updated successfully!")
+            return redirect('dashboard')
+        else:
+            messages.error(request, "There was an error updating the goal.")
+    else:
+        form = FinancialGoalForm(instance=goal)
+    return render(request, 'update_goal.html', {'form': form})
+
+@login_required
+def delete_goal(request, goal_id):
+    goal = get_object_or_404(FinancialGoal, id=goal_id, user=request.user)
+    if request.method == 'POST':
+        goal.delete()
+        messages.success(request, "Goal deleted successfully!")
+        return redirect('dashboard')
+    return render(request, 'delete_goal.html', {'goal': goal})
 
 
 
