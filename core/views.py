@@ -6,11 +6,8 @@ from .forms import ExpenseForm, IncomeForm, FinancialGoalForm
 
 from django.db.models import Sum
 
-from sklearn.linear_model import LinearRegression
-
 import pandas as pd
 from prophet import Prophet
-from prophet.plot import plot_plotly, plot_components_plotly
 
 from .utils import categorize_uncategorized_expenses, generate_default_forecast
 
@@ -54,10 +51,10 @@ def dashboard(request):
         model.fit(user_data)  # user_data is the actual data for the user
         future = model.make_future_dataframe(periods=7)
         forecast = model.predict(future)
-    except (ValueError, Exception):
+    except (ValueError, Exception) as e:
         # Catch any error related to data issues or Prophet
         forecast = generate_default_forecast()
-    # Optionally, inform the user that a default forecast is being shown
+        messages.warning(request, f"Error generating forecast: {str(e)}. Showing default forecast.")
 
 
     # Extract the predicted value for the next month.

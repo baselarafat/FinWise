@@ -28,3 +28,8 @@ jobs:
     - name: Run Tests
       run: |
         python manage.py test
+    - name: Set up database
+      run: |
+      python manage.py makemigrations
+      ython manage.py migrate
+

@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
 from core.forms import ExpenseForm, IncomeForm, FinancialGoalForm
-from core.models import Expense, Income, FinancialGoal, User
+from core.models import Expense, Income, FinancialGoal, User, Category
 
 # Test Views
 class ViewTests(TestCase):
@@ -38,11 +38,23 @@ class UserModelTests(TestCase):
 
 # Test Form Validity
 class ExpenseFormTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='testpass')
     def test_valid_form(self):
-        data = {'description': 'Test Expense', 'category': 'groceries', 'amount': 100.50}
+        category = Category.objects.create(name="groceries")
+    
+        # Create a dictionary of data to pass to the form
+        data = {
+            'description': "Test Expense",
+            'category': category.id,  # Use the ID of the category object
+            'amount': 100.50,
+            'user': self.user.id  # Use the ID of the user object
+        }
+    
         form = ExpenseForm(data=data)
+    
         self.assertTrue(form.is_valid())
-
+    
 class IncomeFormTest(TestCase):
     def test_valid_form(self):
         data = {'description': 'Test Income', 'amount': 200.50}
@@ -62,7 +74,8 @@ class ModelTests(TestCase):
         self.user = User.objects.create_user(username='testuser', password='testpassword')
 
     def test_expense_creation(self):
-        expense = Expense.objects.create(description="Test Expense", category="groceries", amount=100.50, user=self.user)
+        category = Category.objects.create(name="groceries")
+        expense = Expense.objects.create(description="Test Expense", category=category, amount=100.50, user=self.user)
         self.assertIsInstance(expense, Expense)
 
     def test_income_creation(self):
