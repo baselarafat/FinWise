@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="header mb-4">Visualize Finances</h2>
+
+    <div class="row mb-4">
+        <!-- Expenses Over Time -->
+        <div class="col-md-6">
+            <div class="chart">
+                <canvas id="expensesOverTimeChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Incomes Over Time -->
+        <div class="col-md-6">
+            <div class="chart">
+                <canvas id="incomesOverTimeChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let ctx1 = document.getElementById('expensesOverTimeChart').getContext('2d');
+            let expensesOverTimeChart = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: {{ expense_dates|safe }},
+                    datasets: [{
+                        label: 'Expenses',
+                        data: {{ expense_amounts|safe }},
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                }
+            });
+
+            let ctx2 = document.getElementById('incomesOverTimeChart').getContext('2d');
+            let incomesOverTimeChart = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: {{ income_dates|safe }},
+                    datasets: [{
+                        label: 'Incomes',
+                        data: {{ income_amounts|safe }},
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                }
+            });
+        });
+    </script>
+</div>
+{% endblock %}

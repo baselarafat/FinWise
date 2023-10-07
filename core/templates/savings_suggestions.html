@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="header mb-4">Savings Suggestions</h2>
+
+    <ul class="list-group">
+        {% for suggestion in suggestions %}
+        <li class="list-group-item">{{ suggestion }}</li>
+        {% empty %}
+        <li class="list-group-item">No suggestions available at the moment.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

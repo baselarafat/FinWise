@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="header mb-4">Compare Actual Expenses with Forecasted Expenses</h2>
+
+    <div class="chart">
+        <canvas id="compareForecastChart"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let ctx = document.getElementById('compareForecastChart').getContext('2d');
+            let compareForecastChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({{ actual_expenses|length }}, (_, i) => i + 1),
+                    datasets: [{
+                        label: 'Actual Expenses',
+                        data: {{ actual_expenses|safe }},
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        fill: false
+                    },
+                    {
+                        label: 'Predicted Expenses',
+                        data: {{ predicted_expenses|safe }},
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                }
+            });
+        });
+    </script>
+</div>
+{% endblock %}

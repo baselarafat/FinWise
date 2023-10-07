@@ -206,5 +206,67 @@ def delete_goal(request, goal_id):
         return redirect('dashboard')
     return render(request, 'delete_goal.html', {'goal': goal})
 
+@login_required
+def visualize_finances(request):
+    user = request.user
+    expenses = Expense.objects.filter(user=user).order_by('date')
+    incomes = Income.objects.filter(user=user).order_by('date')
+
+    # Convert to lists for plotting
+    expense_dates = [e.date for e in expenses]
+    expense_amounts = [e.amount for e in expenses]
+    income_dates = [i.date for i in incomes]
+    income_amounts = [i.amount for i in incomes]
+
+    context = {
+        'expense_dates': expense_dates,
+        'expense_amounts': expense_amounts,
+        'income_dates': income_dates,
+        'income_amounts': income_amounts
+    }
+    return render(request, 'visualize_finances.html', context)
+
+@login_required
+def compare_forecast(request):
+    user = request.user
+    expenses = Expense.objects.filter(user=user).order_by('date')
+
+    # Convert to DataFrame
+    user_data = pd.DataFrame(list(expenses.values('date', 'amount')))
+    user_data.rename(columns={'date': 'ds', 'amount': 'y'}, inplace=True)
+
+    model = Prophet()
+    model.fit(user_data)
+    future = model.make_future_dataframe(periods=30)
+    forecast = model.predict(future)
+
+    # Extract actual and predicted values
+    actual_expenses = user_data['y'].tolist()
+    predicted_expenses = forecast['yhat'].tolist()
+
+    context = {
+        'actual_expenses': actual_expenses,
+        'predicted_expenses': predicted_expenses
+    }
+    return render(request, 'compare_forecast.html', context)
+
+@login_required
+def savings_suggestions(request):
+    user = request.user
+    expenses = Expense.objects.filter(user=user).order_by('date')
+    total_expense = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
+
+    # Simple logic: If the user's expenses are more than a certain threshold, suggest savings
+    suggestions = []
+    if total_expense > 1000:  # You can adjust this threshold
+        suggestions.append("Consider cutting down on dining out.")
+        suggestions.append("Review your monthly subscriptions.")
+        # ... add more suggestions
+
+    context = {
+        'suggestions': suggestions
+    }
+    return render(request, 'savings_suggestions.html', context)
+
 
 

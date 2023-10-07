@@ -22,6 +22,10 @@ urlpatterns = [
     path('delete-income/<int:income_id>/', views.delete_income, name='delete_income'),
     path('update-goal/<int:goal_id>/', views.update_goal, name='update_goal'),
     path('delete-goal/<int:goal_id>/', views.delete_goal, name='delete_goal'),
+    path('visualize_finances/', views.visualize_finances, name='visualize_finances'),
+    path('compare_forecast/', views.compare_forecast, name='compare_forecast'),
+    path('savings_suggestions/', views.savings_suggestions, name='savings_suggestions'),
 
     # ... other URL patterns ...
 ]
+
