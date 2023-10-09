@@ -24,6 +24,7 @@ def login_view(request):
 def signup_view(request):
     return render(request, 'registration/signup.html')
 
+# A simplified dashboard without analysis 
 @login_required
 def dashboard(request):
     user = request.user
@@ -33,39 +34,11 @@ def dashboard(request):
     incomes = Income.objects.filter(user=user).order_by('-date')[:5]
 
     # Calculate total expenses and incomes.
-    expenses_sum = Expense.objects.filter(user=user).aggregate(Sum('amount'))[
-        'amount__sum'] or 0
-    incomes_sum = Income.objects.filter(user=user).aggregate(Sum('amount'))[
-        'amount__sum'] or 0
-
-    # Fetch all expenses for the user.
-    allexpenses = Expense.objects.filter(user=user).order_by('date')
-
-    # Convert the expenses to a DataFrame.
-    # Create a dataframe with dates for the next 30 days
-    user_data = pd.DataFrame(list(allexpenses.values('date', 'amount')))
-    user_data.rename(columns={'date': 'ds', 'amount': 'y'}, inplace=True)
-
-    try:
-        model = Prophet()
-        model.fit(user_data)  # user_data is the actual data for the user
-        future = model.make_future_dataframe(periods=7)
-        forecast = model.predict(future)
-    except (ValueError, Exception) as e:
-        # Catch any error related to data issues or Prophet
-        forecast = generate_default_forecast()
-        messages.warning(request, f"Error generating forecast: {str(e)}. Showing default forecast.")
-
-
-    # Extract the predicted value for the next month.
-    predicted_expense = forecast['yhat'].iloc[-1]
+    expenses_sum = Expense.objects.filter(user=user).aggregate(Sum('amount'))['amount__sum'] or 0
+    incomes_sum = Income.objects.filter(user=user).aggregate(Sum('amount'))['amount__sum'] or 0
 
     # Aggregate expenses by category.
-    category_expenses = Expense.objects.filter(user=user).values(
-        'category').annotate(total=Sum('amount'))
-
-    # Plot the forecast
-    #fig1 = model.plot(forecast)
+    category_expenses = Expense.objects.filter(user=user).values('category').annotate(total=Sum('amount'))
 
     # Build context for the template.
     context = {
@@ -75,10 +48,10 @@ def dashboard(request):
         'expenses_sum': expenses_sum,
         'incomes_sum': incomes_sum,
         'category_expenses': category_expenses,
-        'predicted_expense': predicted_expense,
     }
 
     return render(request, 'dashboard.html', context)
+
 
 @login_required
 def add_expense(request):

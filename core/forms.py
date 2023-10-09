@@ -1,11 +1,12 @@
 from django import forms
-from .models import Expense, Income, FinancialGoal
+from .models import Expense, Income, FinancialGoal, Category
 
 
 class ExpenseForm(forms.ModelForm):
+    category = forms.ModelChoiceField(queryset=Category.objects.all())
     class Meta:
         model = Expense
-        fields = ['description', 'category', 'amount']
+        fields = ['description', 'amount', 'category', 'notes', 'tags']
         # User field is excluded because it's assigned in the view
 
 
