@@ -25,6 +25,7 @@ urlpatterns = [
     path('visualize_finances/', views.visualize_finances, name='visualize_finances'),
     path('compare_forecast/', views.compare_forecast, name='compare_forecast'),
     path('savings_suggestions/', views.savings_suggestions, name='savings_suggestions'),
+    path('ai_insights/', views.ai_insights, name='ai_insights'),
 
     # ... other URL patterns ...
 ]

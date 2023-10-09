@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="header mb-4">AI Insights for {{ request.user.username }}</h2>
+
+    <!-- Financial Overview -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <h4 class="card-title">Financial Overview</h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Monthly Expenses:</strong> ${{ monthly_expenses.amount }}</p>
+                    <p><strong>Monthly Incomes:</strong> ${{ monthly_incomes.amount }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Budget Suggestion:</strong> {{ budget_suggestion }}</p>
+                    <p><strong>Personalized Insight:</strong> {{ insight }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Predictive Analysis -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <h4 class="card-title">Predictive Analysis</h4>
+            <p>Based on your past expenses, here's the forecast for the next 6 months:</p>
+            <canvas id="forecastChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Recommendations -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <h4 class="card-title">Recommendations</h4>
+            <ul class="list-group">
+                <li class="list-group-item">{{ budget_suggestion }}</li>
+                <!-- Add more recommendations as needed -->
+            </ul>
+        </div>
+    </div>
+
+</div>
+
+<!-- Chart.js Initialization -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Data for the forecast chart
+        let forecastData = {
+            labels: {{ forecast.ds|safe }},  // Dates
+            datasets: [{
+                label: 'Forecasted Expenses',
+                data: {{ forecast.yhat|safe }},  // Forecasted values
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                fill: false
+            }]
+        };
+
+        // Options for the forecast chart
+        let forecastOptions = {
+            responsive: true,
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'month'
+                    }
+                },
+                y: {
+                    beginAtZero: true
+                }
+            }
+        };
+
+        // Initialize the forecast chart
+        let ctx = document.getElementById('forecastChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: forecastData,
+            options: forecastOptions
+        });
+    });
+</script>
+
+{% endblock %}

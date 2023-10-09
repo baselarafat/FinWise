@@ -241,5 +241,81 @@ def savings_suggestions(request):
     }
     return render(request, 'savings_suggestions.html', context)
 
+@login_required
+def ai_insights(request):
+    user = request.user
+
+    # Data Collection
+    expenses_df = pd.DataFrame(list(Expense.objects.filter(user=user).values()))
+
+
+    # Ensure the 'date' column is of datetime type
+    expenses_df['date'] = pd.to_datetime(expenses_df['date'])
+
+    # Data Cleaning & Preprocessing
+    expenses_df['amount'] = expenses_df['amount'].astype(float)
+
+    # Handle outliers for amount (using IQR method as an example)
+    Q1 = expenses_df['amount'].quantile(0.25)
+    Q3 = expenses_df['amount'].quantile(0.75)
+    IQR = Q3 - Q1
+    filter = (expenses_df['amount'] >= Q1 - 1.5 * IQR) & (expenses_df['amount'] <= Q3 + 1.5 *IQR)
+    expenses_df = expenses_df[filter]
+
+    # Descriptive Analysis
+
+    # Spending Patterns
+    monthly_expenses = expenses_df.groupby(expenses_df['date'].dt.month).sum()
+
+    # Income Analysis
+    incomes_df = pd.DataFrame(list(Income.objects.filter(user=user).values()))
+    incomes_df['date'] = pd.to_datetime(incomes_df['date'])
+    monthly_incomes = incomes_df.groupby(incomes_df['date'].dt.month).sum()
+
+    # Predictive Analysis
+
+    # Prepare data for Prophet
+    expenses_df = expenses_df.rename(columns={'date': 'ds', 'amount': 'y'})
+
+    print(expenses_df.isnull().sum())
+
+    # Initialize and fit the model
+    model = Prophet()
+    model.fit(expenses_df)
+
+    # Predict for the next 6 months
+    future = model.make_future_dataframe(periods=180)
+    forecast = model.predict(future)
+
+    # Recommendation Systems
+    # Budgeting (simple rule-based example)
+    avg_monthly_expense = monthly_expenses['amount'].mean()
+    if avg_monthly_expense > 1000:
+        budget_suggestion = "Consider setting a monthly budget to track and limit your expenses."
+    else:
+        budget_suggestion = "Your spending is within a reasonable range."
+
+    # Personalized Insights
+    # Comparative Analysis (simple example)
+    avg_expense_all_users = Expense.objects.all().aggregate(Avg('amount'))['amount__avg']
+    user_avg_expense = expenses_df['y'].mean()
+    if user_avg_expense > avg_expense_all_users:
+        insight = "Your expenses are higher than the average user. Consider reviewing your spending habits."
+    else:
+        insight = "Your expenses are in line with the average user."
+
+    # Prepare context for the template
+    context = {
+        'monthly_expenses': monthly_expenses,
+        'monthly_incomes': monthly_incomes,
+        'forecast': forecast,
+        'budget_suggestion': budget_suggestion,
+        'insight': insight,
+        # ... add other context variables as needed
+    }
+
+    return render(request, 'ai_insights.html', context)
+
+
 
 
